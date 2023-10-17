@@ -8,30 +8,30 @@ let users = [];
 const isValid = (username)=>{ //returns boolean
 //write code to check is the username is valid
 let userswithsamename = users.filter((user)=>{
-    return user.username === username
-  });
-  if(userswithsamename.length > 0){
-    return true;
-  } else {
-    return false;
-  }
+  return user.username === username
+});
+if(userswithsamename.length > 0){
+  return true;
+} else {
+  return false;
+}
 }
 
 const authenticatedUser = (username,password)=>{ //returns boolean
 //write code to check if username and password match the one we have in records.
 let validusers = users.filter((user)=>{
-    return (user.username === username && user.password === password)
-  });
-  if(validusers.length > 0){
-    return true;
-  } else {
-    return false;
-  }
+  return (user.username === username && user.password === password)
+});
+if(validusers.length > 0){
+  return true;
+} else {
+  return false;
 }
+}
+
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-  //Write your code here
   const username = req.body.username;
   const password = req.body.password;
 
@@ -55,7 +55,6 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
   const isbnToFind = req.params.isbn;
   const review = req.query.review; // Use request query for reviews
   const username = req.session.authorization.username; // Retrieve username from session
@@ -82,6 +81,25 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     res.send(books[isbnToFind]);
   } else {
     res.status(404).send("Book not found");
+  }
+});
+
+// Delete a review by the user
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  const isbnToFind = req.params.isbn;
+  const username = req.session.authorization.username; // Retrieve username from session
+
+  if (!username) {
+    return res.status(403).send("User not logged in"); // Handle case when user is not logged in
+  }
+
+  if (books[isbnToFind] && books[isbnToFind].reviews && books[isbnToFind].reviews[username]) {
+    // Check if the book and review exist
+    // Delete the user's review
+    delete books[isbnToFind].reviews[username];
+    res.send(books[isbnToFind]);
+  } else {
+    res.status(404).send("Review not found"); // Handle the case where the review or book is not found
   }
 });
 
